@@ -17,7 +17,7 @@ driver.get(url)
 input("Please get in the ppt!")
 driver.switch_to.window(driver.window_handles[-1])
 
-ppt_no = 4
+ppt_no = 1
 while(input("Input q to quit!\n") != 'q'):
     # 获取网页源码
     html_content = driver.page_source
@@ -26,6 +26,7 @@ while(input("Input q to quit!\n") != 'q'):
 
     ppts = soup.find_all("div", {"class": "swiper-slide"})
     pic_num = 1
+    pro_num = 0         # Error number
     for ppt in ppts:
         name = str(ppt_no) + '_' + str(pic_num)
         try:
@@ -34,16 +35,23 @@ while(input("Input q to quit!\n") != 'q'):
             pic_src = ppt.div.div.img['src']
         except Exception as error:
             print(error)
+            pro_num += 1
             continue
+
         response = requests.get(pic_src, stream=True)
         if response.status_code == 200:
             with open('./fig/' + name + '.jpg', 'wb') as f:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, f)
-            print(f"图片已成功下载，{pic_num}/{len(ppts)}")
+            print(f"图片已成功下载，{pic_num}/{int((len(ppts)-pro_num)/2)}")
         else:
             print("下载失败")
         pic_num += 1
+
+        # Skip the last half, which is repetitive
+        if pic_num > int((len(ppts)-pro_num)/2):
+            break
+
     ppt_no += 1
 
 driver.quit()

@@ -2,16 +2,24 @@ import glob
 from pptx import Presentation
 from pptx.util import Inches
 from PIL import Image
+import re
 
-# 创建一个PPT对象
-prs = Presentation()
+# Custom sort key function
+def extract_number(filename):
+    # Extract the number from the filename using regular expression
+    match = re.search(r'_(\d+)', filename)
+    return int(match.group(1)) if match else 0
 
 # 图片文件路径列表
 start_ppt = 1
-end_ppt = 14
+end_ppt = 1
 for ppt_no in range(start_ppt, end_ppt+1):
-    image_paths = glob.glob(f'./fig/{ppt_no}_*.jpg')
+    image_paths = sorted(glob.glob(f'./fig/{ppt_no}_*.jpg'), key=extract_number)
     print(len(image_paths))
+
+    # 创建一个PPT对象
+    prs = Presentation()
+
     # 遍历图片路径列表，将每张图片插入到PPT中
     for count, image_path in enumerate(image_paths):
         print(f'正在处理第{count+1}/{len(image_paths)}张图片：{image_path}')
